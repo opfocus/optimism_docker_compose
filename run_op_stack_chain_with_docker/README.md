@@ -1,5 +1,5 @@
 # Run a op stack chain with docker
-Please note that this file should be used in conjunction with the op-stack documentation. It is not intended for a one-click startup of the op-stack chain. I have limited knowledge of Docker, so it may not be fully mature. However, I have conducted as many tests as possible. 
+Please note that this file should be used in conjunction with the op-stack documentation. **It is not intended for a one-click startup of the op-stack chain**. I have limited knowledge of Docker, so it may not be fully mature. However, I have conducted as many tests as possible. 
 
 Here is an overview:
 - It includes the process of initializing op-geth using genesis.json.
