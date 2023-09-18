@@ -7,8 +7,14 @@ Here is an overview:
 - op-node is delayed by 20 seconds to avoid early startup, which could result in communication being denied with op-geth.
 
 Important Notes:
-- In the absence of genesis.json, the op-geth log will display the following message:
+1. In the absence of genesis.json, the op-geth log will display the following message:
 `root-op-geth-1  | Please generate your genesis.json file following the documentation steps.`
-- At this point, two folders, 'datadir' and 'genesis.json'  have been generated in the op-geth directory and need to be manually deleted to - prepare for the correct content generation.
+2. At this point, two folders, 'datadir' and 'genesis.json'  have been generated in the op-geth directory and need to be manually deleted to - prepare for the correct content generation.
 `rm -rf  datadir  genesis.json`
-- Use `docker-compose down --volumes` to remove the containers, and then restart.
+3. Use `docker-compose down --volumes` to remove the containers, and then restart.
+
+Resource
+- [op-stack doc](https://stack.optimism.io/docs/build/getting-started/) <br>
+- [stopping your Rollup](https://stack.optimism.io/docs/build/operations/#stopping-your-rollup) <br>
+- [op-node\op-bather\op-proposer images](https://github.com/ethereum-optimism/optimism/releases) <br>
+- [op-geth image](https://github.com/ethereum-optimism/op-geth/releases)
