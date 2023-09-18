@@ -1,0 +1,14 @@
+op-node \
+      --l2=http://op-geth:8551 \
+      --l1=$L1_RPC \
+      --l1.rpckind=$RPC_KIND \
+      --l2.jwt-secret=./jwt.txt \
+      --verifier.l1-confs=3 \
+      --rollup.config=./rollup.json \
+      --rpc.addr=0.0.0.0 \
+      --rpc.port=8547 \
+      --p2p.disable \
+      --rpc.enable-admin \
+      --sequencer.enabled \
+      --sequencer.l1-confs=3 \
+      --p2p.sequencer.key=$SEQ_KEY

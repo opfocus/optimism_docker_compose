@@ -1,0 +1,92 @@
+version: '3.4'
+services:
+  op-geth:
+    image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101200.0
+    ports:
+      - "8545:8545"
+    volumes:
+      - /root/op-geth/datadir:/datadir
+      - /root/op-geth/jwt.txt:/jwt.txt
+      - /root/op-geth/genesis.json:/genesis.json
+      - /root/op-geth.sh:/op-geth.sh  
+    entrypoint: ash
+    command:
+      - -c
+      - |
+        # Check if genesis.json file exists
+        if [ ! -f /genesis.json ]; then
+          echo "Please generate your genesis.json file following the documentation steps."
+          exit 1
+        fi
+
+        # Check if initialized.flag file exists
+        if [ ! -f /initialized.flag ]; then
+          # If the file doesn't exist, perform initialization
+
+          # Create the datadir directory
+          mkdir datadir
+          # Initialize datadir
+          geth init --datadir=datadir genesis.json
+          # Create the initialized.flag file to indicate initialization is completed
+          touch /initialized.flag
+        fi
+          sh /op-geth.sh
+
+
+  op-node:
+    image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.1.1
+    ports:
+      - "8547:8547"
+    volumes:
+      - /root/optimism/op-node/jwt.txt:/jwt.txt
+      - /root/optimism/op-node/rollup.json:/rollup.json
+      - /root/op-node.sh:/op-node.sh
+    entrypoint: ash
+    command:
+      - -c
+      - |
+        sleep 20
+        sh /op-node.sh
+    environment:
+      - SEQ_KEY=$SEQ_KEY
+      - RPC_KIND=$RPC_KIND
+      - L1_RPC=$L1_RPC
+    depends_on:
+      - op-geth  # op-node depends on op-geth startup
+
+
+  op-batcher:
+    image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:latest
+    ports:
+      - "8548:8548"
+    command: >
+      --l1-eth-rpc=$L1_RPC
+      --l2-eth-rpc=http://op-geth:8545
+      --rollup-rpc=http://op-node:8547
+      --poll-interval=1s
+      --sub-safety-margin=6
+      --num-confirmations=1
+      --safe-abort-nonce-too-low-count=3
+      --resubmission-timeout=30s
+      --rpc.addr=0.0.0.0
+      --rpc.port=8548
+      --rpc.enable-admin
+      --max-channel-duration=1
+      --private-key=$BATCHER_KEY
+    depends_on:
+      - op-geth  # op-batcher depends on op-geth startup
+      - op-node   # op-batcher depends on op-node startup
+
+  op-proposer:
+    image: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:latest
+    command: >
+      op-proposer
+      --poll-interval=12s
+      --rpc.port=8560
+      --rollup-rpc=http://op-node:8547
+      --l2oo-address=$L2OO_ADDR
+      --private-key=$PROPOSER_KEY
+      --l1-eth-rpc=$L1_RPC
+    depends_on:
+      - op-geth  # op-proposer depends on op-geth startup
+      - op-node   # op-proposer depends on op-node startup
